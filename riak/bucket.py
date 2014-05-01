@@ -19,6 +19,7 @@ under the License.
 """
 import mimetypes
 from riak.util import deprecateQuorumAccessors, deprecated
+from riak.resolver import default_resolver
 
 
 def deprecateBucketQuorumAccessors(klass):
@@ -253,7 +254,10 @@ class RiakBucket(object):
         if callable(self._resolver):
             return self._resolver
         elif self._resolver is None:
-            return self._client.resolver
+            if self._client.resolver is not None:
+                return self._client.resolver
+            else:
+                return default_resolver
         else:
             raise TypeError("resolver is not a function")
 

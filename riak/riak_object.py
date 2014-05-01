@@ -224,7 +224,10 @@ class RiakObject(object):
         if callable(self._resolver):
             return self._resolver
         elif self._resolver is None:
-            return self.bucket.resolver
+            if self.bucket.resolver is not None:
+                return self.bucket.resolver
+            else:
+                return default_resolver
         else:
             raise TypeError("resolver is not a function")
 
