@@ -443,6 +443,7 @@ class RiakHttpTransport(RiakHttpConnection, RiakHttpResources, RiakHttpCodec,
         :type schema: string
         :param n_val: N value of the write
         :type n_val: int
+
         :rtype boolean
         """
         if not self.yz_wm_index:
@@ -471,6 +472,7 @@ class RiakHttpTransport(RiakHttpConnection, RiakHttpResources, RiakHttpCodec,
 
         :param index: a name of a yz index
         :type index: string
+
         :rtype string
         """
         if not self.yz_wm_index:
@@ -515,6 +517,7 @@ class RiakHttpTransport(RiakHttpConnection, RiakHttpResources, RiakHttpCodec,
 
         :param index: a name of a yz index
         :type index: string
+
         :rtype boolean
         """
         if not self.yz_wm_index:
@@ -538,6 +541,7 @@ class RiakHttpTransport(RiakHttpConnection, RiakHttpResources, RiakHttpCodec,
         :type schema: string
         :param content: actual defintion of schema (XML)
         :type content: string
+
         :rtype boolean
         """
         if not self.yz_wm_schema:
@@ -560,6 +564,7 @@ class RiakHttpTransport(RiakHttpConnection, RiakHttpResources, RiakHttpCodec,
 
         :param schema: name of Solr schema
         :type schema: string
+
         :rtype dict
         """
         if not self.yz_wm_schema:
