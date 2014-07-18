@@ -39,6 +39,7 @@ SKIP_INDEXES = int(os.environ.get('SKIP_INDEXES', '1'))
 SKIP_POOL = os.environ.get('SKIP_POOL')
 SKIP_RESOLVE = int(os.environ.get('SKIP_RESOLVE', '0'))
 SKIP_BTYPES = int(os.environ.get('SKIP_BTYPES', '0'))
+RUN_CONSISTENCY = int(os.environ.get('RUN_CONSISTENCY', '0'))
 
 RUN_SECURITY = int(os.environ.get('RUN_SECURITY', '0'))
 SECURITY_USER = os.environ.get('RIAK_TEST_SECURITY_USER', 'testuser')

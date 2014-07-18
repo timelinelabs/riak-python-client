@@ -23,10 +23,11 @@ from riak.tests.test_kv import BasicKVTests, KVFileTests, \
 from riak.tests.test_2i import TwoITests
 from riak.tests.test_btypes import BucketTypeTests
 from riak.tests.test_security import SecurityTests
+from riak.tests.test_consistency import StrongConsistencyTests
 
 from riak.tests import HOST, PB_HOST, PB_PORT, HTTP_HOST, HTTP_PORT, \
     HAVE_PROTO, DUMMY_HTTP_PORT, DUMMY_PB_PORT, \
-    SKIP_SEARCH, RUN_YZ, SECURITY_CREDS
+    SKIP_SEARCH, RUN_YZ, SECURITY_CREDS, RUN_CONSISTENCY
 
 testrun_search_bucket = None
 testrun_props_bucket = None
@@ -34,12 +35,13 @@ testrun_sibs_bucket = None
 testrun_yz_bucket = None
 testrun_mr_btype = None
 testrun_mr_bucket = None
+testrun_consist_bucket = None
 
 
 def setUpModule():
     global testrun_search_bucket, testrun_props_bucket, \
         testrun_sibs_bucket, testrun_yz_bucket, testrun_mr_btype, \
-        testrun_mr_bucket
+        testrun_mr_bucket, testrun_consist_bucket
 
     c = RiakClient(protocol='pbc', host=PB_HOST, http_port=HTTP_PORT,
                    pb_port=PB_PORT, credentials=SECURITY_CREDS)
@@ -47,6 +49,7 @@ def setUpModule():
     testrun_props_bucket = 'propsbucket'
     testrun_sibs_bucket = 'sibsbucket'
     c.bucket(testrun_sibs_bucket).allow_mult = True
+    testrun_consist_bucket = 'pytest-consistent'
 
     if (not SKIP_SEARCH and not RUN_YZ):
         testrun_search_bucket = 'searchbucket'
@@ -82,7 +85,7 @@ def setUpModule():
 
 def tearDownModule():
     global testrun_search_bucket, testrun_props_bucket, \
-        testrun_sibs_bucket, testrun_yz_bucket
+        testrun_sibs_bucket, testrun_yz_bucket, testrun_consist_bucket
 
     c = RiakClient(protocol='http', host=HTTP_HOST, http_port=HTTP_PORT,
                    pb_port=PB_PORT, credentials=SECURITY_CREDS)
@@ -153,6 +156,7 @@ class BaseTestCase(object):
         self.mr_btype = testrun_mr_btype
         self.mr_bucket = testrun_mr_bucket
         self.credentials = SECURITY_CREDS
+        self.consistent_bucket = testrun_consist_bucket
 
         self.client = self.create_client()
 
@@ -314,6 +318,7 @@ class RiakPbcTransportTestCase(BasicKVTests,
                                CounterTests,
                                BucketTypeTests,
                                SecurityTests,
+                               StrongConsistencyTests,
                                BaseTestCase,
                                unittest.TestCase):
 
@@ -348,6 +353,7 @@ class RiakHttpTransportTestCase(BasicKVTests,
                                 CounterTests,
                                 BucketTypeTests,
                                 SecurityTests,
+                                StrongConsistencyTests,
                                 BaseTestCase,
                                 unittest.TestCase):
 
