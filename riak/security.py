@@ -76,25 +76,24 @@ class SecurityCreds(object):
         self.cert_file = cert_file
         self.cacert_file = cacert_file
         self.crl_file = crl_file
+        self.crl = None
         self.ciphers = ciphers
         self.ssl_version = ssl_version
 
+    def has_crl(self):
+        return (self.crl is not None) or (self.crl_file is not None)
 
-def check_revoked_cert(ssl_socket, crl_file):
-    """
-    Determine if the server certificate has been revoked or not.
+    def check_revoked_cert(self, ssl_socket):
+        if not self.has_crl():
+            return True
 
-    :param ssl_socket: Secure SSL socket
-    :type ssl_socket: socket
-    :param crl_file: Certificate Revocation List file
-    :type crl_file: str
-    """
-    f = open(crl_file, 'r')
-    crl = crypto.load_crl(OpenSSL.SSL.FILETYPE_PEM, f.read())
-    revs = crl.get_revoked()
-    servcert = ssl_socket.get_peer_certificate()
-    servserial = servcert.get_serial_number()
-    for rev in revs:
-        if servserial == long(rev.get_serial(), 16):
-            raise RiakError(
-                "Server certificate has been revoked")
+        if not self.crl:
+            with open(self.crl_file, 'r') as f:
+                self.crl = crypto.load_crl(OpenSSL.SSL.FILETYPE_PEM, f.read())
+
+        servcert = ssl_socket.get_peer_certificate()
+        servserial = servcert.get_serial_number()
+        for rev in self.crl.get_revoked():
+            if servserial == long(rev.get_serial(), 16):
+                raise SecurityError(
+                    "Server certificate has been revoked")

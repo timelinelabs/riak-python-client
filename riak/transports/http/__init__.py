@@ -21,7 +21,7 @@ import httplib
 import socket
 import select
 
-from riak.security import SecurityError, check_revoked_cert
+from riak.security import SecurityError
 from riak.transports.security import RiakWrappedSocket, configure_context
 from riak.transports.pool import Pool
 from riak.transports.http.transport import RiakHttpTransport
@@ -102,8 +102,8 @@ class RiakHTTPSConnection(httplib.HTTPSConnection):
             break
 
         self.sock = RiakWrappedSocket(cxn, sock)
-        if self.credentials.crl_file:
-            check_revoked_cert(self.sock, self.credentials.crl_file)
+        if self.credentials.has_crl():
+            self.credentials.check_revoked_cert(self.sock)
 
 
 class RiakHttpPool(Pool):
