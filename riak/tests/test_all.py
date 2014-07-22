@@ -113,6 +113,7 @@ def tearDownModule():
 
 CACHED_CLIENTS = {}
 
+
 class BaseTestCase(object):
 
     host = None
