@@ -310,6 +310,7 @@ class BasicKVTests(object):
 
     def test_siblings(self):
         # Set up the bucket, clear any existing object...
+        self.client.resolver = default_resolver
         bucket = self.client.bucket(self.sibs_bucket)
         obj = bucket.get(self.key_name)
         bucket.allow_mult = True
@@ -395,12 +396,13 @@ class BasicKVTests(object):
 
     def test_tombstone_siblings(self):
         # Set up the bucket, clear any existing object...
+        self.client.resolver = default_resolver
         bucket = self.client.bucket(self.sibs_bucket)
-        obj = bucket.get(self.key_name)
         bucket.allow_mult = True
 
+        obj = bucket.new(self.key_name)
         obj.encoded_data = 'start'
-        obj.content_type = 'application/octet-stream'
+        obj.content_type = 'text/plain'
         obj.store(return_body=True)
 
         obj.delete()
