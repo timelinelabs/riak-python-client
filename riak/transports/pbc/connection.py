@@ -157,7 +157,7 @@ class RiakPbcConnection(object):
                 break
             nmsglen += x
         if len(nmsglen) != 4:
-            raise RiakError(
+            raise IOError(
                 "Socket returned short packet length %d - expected 4"
                 % len(nmsglen))
         msglen, = struct.unpack('!i', nmsglen)
@@ -170,8 +170,8 @@ class RiakPbcConnection(object):
                 break
             self._inbuf += recv_buf
         if len(self._inbuf) != self._inbuf_len:
-            raise RiakError("Socket returned short packet %d - expected %d"
-                            % (len(self._inbuf), self._inbuf_len))
+            raise IOError("Socket returned short packet %d - expected %d"
+                          % (len(self._inbuf), self._inbuf_len))
 
     def _connect(self):
         if not self._socket:
