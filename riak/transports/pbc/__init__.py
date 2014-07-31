@@ -70,5 +70,7 @@ def is_retryable(err):
     if isinstance(err, socket.error):
         code = err.args[0]
         return code in CONN_CLOSED_ERRORS
+    elif isinstance(err, IOError):
+        return True
     else:
         return False
