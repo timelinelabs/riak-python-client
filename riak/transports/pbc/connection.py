@@ -132,7 +132,7 @@ class RiakPbcConnection(object):
                 return True
             except Exception as e:
                 # fail if *any* exceptions are thrown during SSL handshake
-                raise RiakError(e.message)
+                raise SecurityError(e.message)
 
     def _recv_msg(self, expect=None):
         self._recv_pkt()
@@ -152,6 +152,11 @@ class RiakPbcConnection(object):
 
     def _recv_pkt(self):
         nmsglen = self._socket.recv(4)
+        while len(nmsglen) < 4:
+            x = self._socket.recv(4 - len(nmsglen))
+            if not x:
+                break
+            nmsglen += x
         if len(nmsglen) != 4:
             raise IOError(
                 "Socket returned short packet length %d - expected 4"
@@ -184,10 +189,8 @@ class RiakPbcConnection(object):
         Closes the underlying socket of the PB connection.
         """
         if self._socket:
-            if self._client._credentials:
-                self._socket.shutdown()
-            else:
-                self._socket.shutdown(socket.SHUT_RDWR)
+            self._socket.close()
+            del self._socket
 
     def _parse_msg(self, code, packet):
         try:
