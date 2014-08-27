@@ -16,6 +16,8 @@ specific language governing permissions and limitations
 under the License.
 """
 
+import logging
+import select
 import socket
 import struct
 import riak_pb
@@ -45,7 +47,25 @@ class RiakPbcConnection(object):
         hdr = struct.pack("!iB", 1 + slen, msg_code)
         return hdr + msgstr
 
+    def _check_and_fix_socket(self):
+        def socket_has_data():
+            if not self._socket:
+                return False
+            rlist = [self._socket]
+            wlist = xlist = []
+            rlist, wlist, xlist = select.select(rlist, wlist, xlist, 0)
+            return bool(rlist)
+
+        if socket_has_data():
+            # If an error occurred on this socket previously, and the socket
+            # was not recreated, there could be stale data on the socket.  We
+            # could read it off but throwing an IOError should trigger it to
+            # be destroyed.
+            logging.warn("Socket has data before send: %s", self._socket)
+            raise IOError("Socket has data before send")
+
     def _request(self, msg_code, msg=None, expect=None):
+        self._check_and_fix_socket()
         self._send_msg(msg_code, msg)
         return self._recv_msg(expect)
 
