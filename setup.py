@@ -2,7 +2,7 @@
 import platform
 from setuptools import setup, find_packages
 from version import get_version
-from commands import preconfigure, configure, create_bucket_types, \
+from riak_commands import preconfigure, configure, create_bucket_types, \
     setup_security, enable_security, disable_security
 
 install_requires = ["riak_pb >=2.0.0", "pyOpenSSL >= 0.14"]
