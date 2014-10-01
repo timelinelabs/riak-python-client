@@ -16,6 +16,7 @@ specific language governing permissions and limitations
 under the License.
 """
 
+import codecs
 import logging
 import select
 import socket
@@ -47,25 +48,29 @@ class RiakPbcConnection(object):
         hdr = struct.pack("!iB", 1 + slen, msg_code)
         return hdr + msgstr
 
-    def _check_and_fix_socket(self):
-        def socket_has_data():
+    def _check_socket(self):
+        def socket_recv_would_block():
             if not self._socket:
-                return False
+                return True
             rlist = [self._socket]
             wlist = xlist = []
             rlist, wlist, xlist = select.select(rlist, wlist, xlist, 0)
-            return bool(rlist)
+            return not rlist
 
-        if socket_has_data():
-            # If an error occurred on this socket previously, and the socket
-            # was not recreated, there could be stale data on the socket.  We
-            # could read it off but throwing an IOError should trigger it to
-            # be destroyed.
-            logging.warn("Socket has data before send: %s", self._socket)
-            raise IOError("Socket has data before send")
+        if not socket_recv_would_block():
+            data = self._socket.recv(64)
+            if data:
+              # If an error occurred on this socket previously, and the socket
+              # was not recreated, there could be stale data on the socket.  We
+              # could read it off but throwing an IOError should trigger it to
+              # be destroyed.
+              logging.warn("Socket has data before send: %s %r", self._socket, codecs.encode(data, 'string_escape'))
+            else:
+              logging.warn("Socket closed unexpectedly")
+            raise IOError("Socket not clean")
 
     def _request(self, msg_code, msg=None, expect=None):
-        self._check_and_fix_socket()
+        self._check_socket()
         self._send_msg(msg_code, msg)
         return self._recv_msg(expect)
 
