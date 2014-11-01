@@ -52,10 +52,10 @@ class RiakPbcConnection(object):
         def socket_recv_would_block():
             if not self._socket:
                 return True
-            rlist = [self._socket]
-            wlist = xlist = []
-            rlist, wlist, xlist = select.select(rlist, wlist, xlist, 0)
-            return not rlist
+            poller = select.poll()
+            poller.register(self._socket)
+            events = poller.poll(0)
+            return bool(events)
 
         if not socket_recv_would_block():
             data = self._socket.recv(64)
