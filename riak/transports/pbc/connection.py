@@ -49,15 +49,13 @@ class RiakPbcConnection(object):
         return hdr + msgstr
 
     def _check_socket(self):
-        def socket_recv_would_block():
+        def socket_recv_can_recv():
             if not self._socket:
-                return True
-            poller = select.poll()
-            poller.register(self._socket)
-            events = poller.poll(0)
+                return False
+            events = self._poller.poll(0)
             return bool(events)
 
-        if not socket_recv_would_block():
+        if socket_recv_can_recv():
             data = self._socket.recv(64)
             if data:
               # If an error occurred on this socket previously, and the socket
@@ -207,6 +205,8 @@ class RiakPbcConnection(object):
                 self._socket = socket.create_connection(self._address)
             if self._client._credentials:
                 self._init_security()
+            self._poller = select.poll()
+            self._poller.register(self._socket, select.POLLIN|select.POLLPRI)
 
     def close(self):
         """
