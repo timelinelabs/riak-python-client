@@ -18,9 +18,9 @@ under the License.
 
 import codecs
 import logging
-import select
 import socket
 import struct
+from trollius import selectors
 import riak_pb
 from riak.security import SecurityError
 from riak.transports.security import configure_context
@@ -52,7 +52,7 @@ class RiakPbcConnection(object):
         def socket_recv_can_recv():
             if not self._socket:
                 return False
-            events = self._poller.poll(0)
+            events = self._selector.select(timeout=0)
             return bool(events)
 
         if socket_recv_can_recv():
@@ -205,8 +205,8 @@ class RiakPbcConnection(object):
                 self._socket = socket.create_connection(self._address)
             if self._client._credentials:
                 self._init_security()
-            self._poller = select.poll()
-            self._poller.register(self._socket, select.POLLIN|select.POLLPRI)
+            self._selector = selectors.DefaultSelector()
+            self._selector.register(self._socket, selectors.EVENT_READ)
 
     def close(self):
         """
